@@ -7,7 +7,7 @@ Version 0.02
 
 This simulation calculates solar insulation in desired location throughout the year, and generated
 graphic results. In this case the location chosen was Las Vegas, NV.
-The results currently take into account horizontal surface alone.
+The results currently take into account two-axis tracking surface (maximum flux possible).
 
 """
 
