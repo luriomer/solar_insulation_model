@@ -7,8 +7,7 @@ Version 0.02
 
 This simulation calculates solar insulation in desired location throughout the year, and generated
 graphic results. In this case the location chosen was Las Vegas, NV.
-The results currently take into account two-axis tracking surface (maximum flux possible).
-
+The current model takes into account constant surface direction.
 """
 
 from __future__ import division
@@ -24,6 +23,9 @@ phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
 
+''' Surface vector '''
+surf_p = np.array([0,0,2])
+surf_p = surf_p/np.sqrt(np.dot(surf_p,surf_p)) #Normalization of surface vector
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
@@ -56,7 +58,8 @@ k = rk*(0.2711+0.01858*(2.5-A)**2)
 
 ''' Preperation of array variables '''
 shape = [len(days),len(hours)] # General array matrix shape [days and hours]
-cos_theta_z = np.zeros(shape, dtype=float)
+sun_vec = np.zeros([3,len(days),len(hours)])
+cos_theta = np.zeros(shape, dtype=float)
 tau_b = np.zeros(shape, dtype=float)
 tau_d = np.zeros(shape, dtype=float)
 Gb = np.zeros(shape, dtype=float) # Beam flux (instant)
@@ -76,10 +79,14 @@ omega = (delta_t_solar*360/(24))*np.pi/180 #Hour angle [rad]
 
 for i in range(len(days)):
     for j in range(len(delta_t_solar)):
-        cos_theta_z[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
-        tau_b[i,j] = a0[i]+a1[i]*np.exp(-k[i]/cos_theta_z[i,j])
-        Gb[i,j] = G0*tau_b[i,j]
-        tau_d[i,j] = cos_theta_z[i,j]*(0.271-0.294*tau_b[i,j])
+        sun_vec[0,i,j] = -np.sin(phi)*np.cos(delta[i])*np.cos(omega[j])+np.cos(phi)*np.sin(delta[i])
+        sun_vec[1,i,j] = np.cos(delta[i])*np.sin(omega[j])
+        sun_vec[2,i,j] = np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i])
+        cos_theta[i,j] = (np.dot(sun_vec[:,i,j],surf_p))/(np.linalg.norm(sun_vec[:,i,j])*np.linalg.norm(surf_p))
+        #zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
+        tau_b[i,j] = a0[i]+a1[i]*np.exp(-k[i]/cos_theta[i,j])
+        Gb[i,j] = G0*tau_b[i,j]*cos_theta[i,j]
+        tau_d[i,j] = cos_theta[i,j]*(0.271-0.294*tau_b[i,j])
         Gd[i,j] = G0*tau_d[i,j]
         Gtot[i,j] = Gb[i,j] + Gd[i,j]
     Gav_day[i] = np.average(Gtot[i])
@@ -98,7 +105,7 @@ E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 12 hours
 plt.close('all')
 
 fig1 = plt.figure()
-fig1.suptitle("Simulation results for Las-Vegas, Nevada", fontweight = "bold", fontsize=20)
+fig1.suptitle("Simulation results for Las-Vegas, NV. Surface normal = "+str(surf_p), fontweight = "bold", fontsize=20)
 ax1 = fig1.add_subplot(221)
 ax1.plot(days,Gav_day, label = "Simulation")
 ax1.plot(days,Gav_emp*2, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
