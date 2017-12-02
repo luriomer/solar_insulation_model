@@ -3,7 +3,7 @@
 Created on Sat Nov 25 17:39:30 2017
 
 @author: Omer Luria
-Version 0.02
+Version 0.03
 
 This simulation calculates solar insulation in desired location throughout the year, and generated
 graphic results. In this case the location chosen was Las Vegas, NV.
@@ -16,16 +16,23 @@ import matplotlib.pyplot as plt
 
 
 ''' Las Vegas and universal parameters '''
+location_name = "Las-Vegas, NV"
 axial_tilt = 23.45*(np.pi/180) # Earth axial tilt angle [rad]
 L_std = 120 # Standart longtitude line (west) [deg]
 L = 115     # Actual longtitude line (west) [deg]
 phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
+summer_start = 171 # First day of summer [days, 1 = Jan 1st]. In Las-Vegas June 21
+summer_end = 262 # Last day of summer [days, 1 = Jan 1st]. In Las-Vegas Sep 22
 
-''' Surface vector '''
-surf_p = np.array([0,1,1])
+
+''' Surface direction vector derivation (transformation to local coordinates and normalize) '''
+surf_p = np.array([1,0,0]) # Surface direction vector in geocentric coordinates
+G_to_L_trans = np.array([[-np.sin(phi),0,np.cos(phi)],[0,-1,0],[np.cos(phi),0,np.sin(phi)]])
+surf_p = G_to_L_trans.dot(surf_p)
 surf_p = surf_p/np.sqrt(np.dot(surf_p,surf_p)) #Normalization of surface vector
+
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
@@ -37,13 +44,12 @@ B = (2*np.pi*(days-1)/365)*np.pi/180 # Assisting parameter [rad]
 delta = axial_tilt*np.sin((B-80*2*np.pi/365)*np.pi/180) #Declination angle [rad]
 
 
-''' Calculation of Hottel correlation coefficients. 
-    In Las Vegas, summer is 21 June to 22 September '''
+''' Calculation of Hottel correlation coefficients '''
 r0 = np.zeros_like(days, dtype=float)
 r1 = np.zeros_like(days, dtype=float)
 rk = np.zeros_like(days, dtype=float)
 for i in range(len(days)):
-    if (days[i]>=171 and days[i]<=262):
+    if (days[i]>=summer_start and days[i]<=summer_end):
         r0[i] = 0.97
         r1[i] = 0.99
         rk[i] = 1.02
@@ -70,6 +76,7 @@ Gb_av = np.zeros_like(days, dtype=float) # Beam average flux
 Gd_av = np.zeros_like(days, dtype=float) # Diffuse average flux
 Gav_hr = np.zeros_like(hours, dtype=float)# Hourly average flux
 
+
 ''' Calculation of daily parameters '''
 delta_t_solar = hours-12
 omega = (delta_t_solar*360/(24))*np.pi/180 #Hour angle [rad]
@@ -93,19 +100,21 @@ for i in range(len(days)):
     Gb_av[i] = np.average(Gb[i])
     Gd_av[i] = np.average(Gd[i])
 
+
 ''' Importing empirical data '''
 Gav_emp = np.loadtxt('empirical_insulation.txt')
-
 
 
 ''' Calculation of total annual solar energy (average) '''
 E_sim = round(np.sum(Gtot)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh (two digit prec.)
 E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 12 hours of insulation. Change is the same.
+
+
 ''' Plotting the results '''
 plt.close('all')
 
 fig1 = plt.figure()
-fig1.suptitle("Simulation results for Las-Vegas, NV.\nSurface normal = "
+fig1.suptitle("Simulation results for "+location_name+".\nSurface normal = "
               +str(surf_p), fontweight = "bold", fontsize=18)
 ax1 = fig1.add_subplot(221)
 ax1.plot(days,Gav_day, label = "Simulation")
@@ -113,13 +122,11 @@ ax1.plot(days,Gav_emp*2, label = "Empirical") #Multiplting since the eimpirical 
 ax1.set_xlabel("Day")
 ax1.set_ylabel("Average flux [W/m$^2$]")
 ax1.set_title("Average daily flux based on 12 hours of daylight")
-
 ax1.annotate("Total annual energy per unit area: \n "+
          "--------------------------------------------------\n"+
          "Theoretical (simulation) E = "+str(E_sim)+" [MWh/m$^2$] \n"+
          "Empirical (atmospheric data) E = "+str(E_emp)+" [MWh/m$^2$]", 
          fontsize = 11, color="red", fontweight = "bold", xy=(70, 240))
-
 ax1.legend()
 ax1.grid()
 
