@@ -98,7 +98,7 @@ E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 12 hours
 plt.close('all')
 
 fig1 = plt.figure()
-fig1.suptitle("Simulation results for Las-Vegas, Nevada", fontweight = "bold", fontsize=20)
+fig1.suptitle("Simulation results for Las-Vegas, NV. (Two-Axis Tracking)", fontweight = "bold", fontsize=20)
 ax1 = fig1.add_subplot(221)
 ax1.plot(days,Gav_day, label = "Simulation")
 ax1.plot(days,Gav_emp*2, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
