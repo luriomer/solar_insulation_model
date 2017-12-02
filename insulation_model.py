@@ -62,8 +62,8 @@ tau_d = np.zeros(shape, dtype=float)
 Gb = np.zeros(shape, dtype=float) # Beam flux (instant)
 Gd = np.zeros(shape, dtype=float) # Diffuse flux (instant)
 Gtot = np.zeros(shape, dtype=float) # Total flux (instant)
-Gav = np.zeros_like(days, dtype=float) # Daily total flux (average)
-
+Gav_day = np.zeros_like(days, dtype=float) # Daily average flux
+Gav_hr = np.zeros_like(hours, dtype=float)# Hourly average flux
 
 ''' Calculation of daily parameters '''
 delta_t_solar = hours-12
@@ -80,7 +80,7 @@ for i in range(len(days)):
         tau_d[i,j] = cos_theta_z[i,j]*(0.271-0.294*tau_b[i,j])
         Gd[i,j] = G0*tau_d[i,j]
         Gtot[i,j] = Gb[i,j] + Gd[i,j]
-    Gav[i] = np.average(Gtot[i])
+    Gav_day[i] = np.average(Gtot[i])
 
 
 ''' Importing empirical data '''
@@ -93,11 +93,11 @@ plt.close('all')
 fig1 = plt.figure()
 
 ax1 = fig1.add_subplot(221)
-ax1.plot(days,Gav, label = "Simulation")
+ax1.plot(days,Gav_day, label = "Simulation")
 ax1.plot(days,Gav_emp, label = "Empirical")
 ax1.set_xlabel("Day")
 ax1.set_ylabel("Average flux [W/m$^2$]")
-ax1.set_title("Average daily throught the year")
+ax1.set_title("Average daily flux")
 ax1.legend()
 ax1.grid()
 
@@ -106,15 +106,16 @@ for i in range(len(delta_t_solar)):
     ax2.plot(days,Gtot[:,i],label = "$\Delta$t = "+str(delta_t_solar[i]))
     ax2.set_xlabel("Day")
     ax2.set_ylabel("Total flux [W/m$^2$]")
-    ax2.set_title("Total daily flux throughout the year")
+    ax2.set_title("Total daily flux")
     ax2.legend()
     ax2.grid()
 
 ax3 = fig1.add_subplot(223)
-for j in range(len(days)):
-    ax3.plot(hours,Gtot[j])
-    ax3.set_xlabel("Hour")
-    ax3.set_ylabel("Total flux [W/m$^2$]")
-    ax3.set_title("Total flux throughout the day")
-    ax3.legend()
-    ax3.grid()
+for j in range(len(hours)):
+    Gav_hr[j] = np.average(Gtot[:,j])
+ax3.plot(hours,Gav_hr)
+ax3.set_xlabel("Hour")
+ax3.set_ylabel("Total flux [W/m$^2$]")
+ax3.set_title("Average hourly flux")
+ax3.legend()
+ax3.grid()
