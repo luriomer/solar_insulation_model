@@ -84,7 +84,13 @@ for i in range(len(days)):
 
 
 ''' Importing empirical data '''
-Gav_emp = np.loadtxt('empirical_insulation.txt')
+Gav_emp = 2*np.loadtxt('empirical_insulation.txt') 
+#Multiplting since the eimpirical averaging is for 24 hours
+
+
+''' Calculation of total annual solar energy (average) '''
+E_sim = np.sum(Gtot) # Here we have all the data so simply sum it all
+E_emp = np.sum(Gav_emp)*12 # Multiply every day average by 12 hours of insulation
 
 
 ''' Plotting the results '''
@@ -97,7 +103,7 @@ ax1.plot(days,Gav_day, label = "Simulation")
 ax1.plot(days,Gav_emp, label = "Empirical")
 ax1.set_xlabel("Day")
 ax1.set_ylabel("Average flux [W/m$^2$]")
-ax1.set_title("Average daily flux")
+ax1.set_title("Average daily flux based on 12 hours of solar insulation")
 ax1.legend()
 ax1.grid()
 
@@ -119,3 +125,9 @@ ax3.set_ylabel("Total flux [W/m$^2$]")
 ax3.set_title("Average hourly flux")
 ax3.legend()
 ax3.grid()
+
+ax4 = fig1.add_subplot(224)
+ax4.text(0.1,0.7, "Total annual energy per unit area: ", fontsize = 16)
+ax4.text(0.1,0.6, "-------------------------------------------------- ", fontsize = 16)
+ax4.text(0.1,0.5, "Theoretical (simulation) E = "+str(round(E_sim)/1e6)+" [MJ/m$^2$]", fontsize = 16)
+ax4.text(0.1,0.4, "Empirical (atmospheric data) E = "+str(round(E_emp)/1e6)+" [MJ/m$^2$]", fontsize = 16)
