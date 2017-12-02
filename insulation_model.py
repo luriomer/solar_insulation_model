@@ -28,11 +28,11 @@ summer_end = 262 # Last day of summer [days, 1 = Jan 1st]. In Las-Vegas Sep 22
 
 
 ''' Surface direction vector derivation (transformation to local coordinates and normalize) '''
-surf_p = np.array([1,0,0]) # Surface direction vector in geocentric coordinates
+surf_p_geo = np.array([1,0,0]) # Surface direction vector in geocentric coordinates
 G_to_L_trans = np.array([[-np.sin(phi),0,np.cos(phi)],[0,-1,0],[np.cos(phi),0,np.sin(phi)]])
-surf_p = G_to_L_trans.dot(surf_p)
-surf_p = surf_p/np.sqrt(np.dot(surf_p,surf_p)) #Normalization of surface vector
-
+surf_p_local = G_to_L_trans.dot(surf_p_geo) # Coordinate transformation
+surf_p_local = surf_p_local/np.sqrt(np.dot(surf_p_local,surf_p_local)) #Normalization of surface vector
+# Note: after the transformation all of the references to the surface vector is by local coordinates!
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
@@ -89,7 +89,7 @@ for i in range(len(days)):
         sun_vec[0,i,j] = -np.sin(phi)*np.cos(delta[i])*np.cos(omega[j])+np.cos(phi)*np.sin(delta[i])
         sun_vec[1,i,j] = np.cos(delta[i])*np.sin(omega[j])
         sun_vec[2,i,j] = np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i])
-        cos_theta[i,j] = (np.dot(sun_vec[:,i,j],surf_p))/(np.linalg.norm(sun_vec[:,i,j])*np.linalg.norm(surf_p))
+        cos_theta[i,j] = (np.dot(sun_vec[:,i,j],surf_p_local))/(np.linalg.norm(sun_vec[:,i,j])*np.linalg.norm(surf_p_local))
         #zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
         tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_theta[i,j])),0)
         Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0)
@@ -106,16 +106,16 @@ Gav_emp = np.loadtxt('empirical_insulation.txt')
 
 
 ''' Calculation of total annual solar energy (average) '''
-E_sim = round(np.sum(Gtot)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh (two digit prec.)
-E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 12 hours of insulation. Change is the same.
+E_sim = round(np.sum(Gtot)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh.
+E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 12 hours of insulation.
 
 
 ''' Plotting the results '''
 plt.close('all')
 
 fig1 = plt.figure()
-fig1.suptitle("Simulation results for "+location_name+".\nSurface normal = "
-              +str(surf_p), fontweight = "bold", fontsize=18)
+fig1.suptitle("Simulation results for "+location_name+".\nSurface normal (geocentric coordinates) = "
+              +str(surf_p_geo), fontweight = "bold", fontsize=18)
 ax1 = fig1.add_subplot(221)
 ax1.plot(days,Gav_day, label = "Simulation")
 ax1.plot(days,Gav_emp*2, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
