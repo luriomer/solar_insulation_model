@@ -3,7 +3,7 @@
 Created on Sat Nov 25 17:39:30 2017
 
 @author: Omer Luria
-Version 0.01
+Version 0.02
 
 This simulation calculates solar insulation in desired location throughout the year, and generated
 graphic results. In this case the location chosen was Las Vegas, NV.
@@ -63,6 +63,8 @@ Gb = np.zeros(shape, dtype=float) # Beam flux (instant)
 Gd = np.zeros(shape, dtype=float) # Diffuse flux (instant)
 Gtot = np.zeros(shape, dtype=float) # Total flux (instant)
 Gav_day = np.zeros_like(days, dtype=float) # Daily average flux
+Gb_av = np.zeros_like(days, dtype=float) # Beam average flux
+Gd_av = np.zeros_like(days, dtype=float) # Diffuse average flux
 Gav_hr = np.zeros_like(hours, dtype=float)# Hourly average flux
 
 ''' Calculation of daily parameters '''
@@ -81,35 +83,40 @@ for i in range(len(days)):
         Gd[i,j] = G0*tau_d[i,j]
         Gtot[i,j] = Gb[i,j] + Gd[i,j]
     Gav_day[i] = np.average(Gtot[i])
-
+    Gb_av[i] = np.average(Gb[i])
+    Gd_av[i] = np.average(Gd[i])
 
 ''' Importing empirical data '''
-Gav_emp = 2*np.loadtxt('empirical_insulation.txt') 
-#Multiplting since the eimpirical averaging is for 24 hours
+Gav_emp = np.loadtxt('empirical_insulation.txt')
+
 
 
 ''' Calculation of total annual solar energy (average) '''
-E_sim = np.sum(Gtot) # Here we have all the data so simply sum it all
-E_emp = np.sum(Gav_emp)*12 # Multiply every day average by 12 hours of insulation
-
-
+E_sim = round(np.sum(Gtot)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh (two digit prec.)
+E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 12 hours of insulation. Change is the same.
 ''' Plotting the results '''
 plt.close('all')
 
 fig1 = plt.figure()
-
+fig1.suptitle("Simulation results for Las-Vegas, Nevada", fontweight = "bold", fontsize=20)
 ax1 = fig1.add_subplot(221)
 ax1.plot(days,Gav_day, label = "Simulation")
-ax1.plot(days,Gav_emp, label = "Empirical")
+ax1.plot(days,Gav_emp*2, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
 ax1.set_xlabel("Day")
 ax1.set_ylabel("Average flux [W/m$^2$]")
-ax1.set_title("Average daily flux based on 12 hours of solar insulation")
+ax1.set_title("Average daily flux based on 12 hours of daylight")
+
+ax1.annotate("Total annual energy per unit area: \n "+
+         "--------------------------------------------------\n"+
+         "Theoretical (simulation) E = "+str(E_sim)+" [MWh/m$^2$] \n"+
+         "Empirical (atmospheric data) E = "+str(E_emp)+" [MWh/m$^2$]", fontsize = 11, color="red", fontweight = "bold", xy=(70, 240))
+
 ax1.legend()
 ax1.grid()
 
 ax2 = fig1.add_subplot(222)
 for i in range(len(delta_t_solar)):
-    ax2.plot(days,Gtot[:,i],label = "$\Delta$t = "+str(delta_t_solar[i]))
+    ax2.plot(days,Gtot[:,i],label = "$\Delta$t solar = "+str(delta_t_solar[i]))
     ax2.set_xlabel("Day")
     ax2.set_ylabel("Total flux [W/m$^2$]")
     ax2.set_title("Total daily flux")
@@ -127,7 +134,10 @@ ax3.legend()
 ax3.grid()
 
 ax4 = fig1.add_subplot(224)
-ax4.text(0.1,0.7, "Total annual energy per unit area: ", fontsize = 16)
-ax4.text(0.1,0.6, "-------------------------------------------------- ", fontsize = 16)
-ax4.text(0.1,0.5, "Theoretical (simulation) E = "+str(round(E_sim)/1e6)+" [MJ/m$^2$]", fontsize = 16)
-ax4.text(0.1,0.4, "Empirical (atmospheric data) E = "+str(round(E_emp)/1e6)+" [MJ/m$^2$]", fontsize = 16)
+ax4.plot(days,Gb_av, label = "Beam")
+ax4.plot(days,Gd_av, label = "Diffuse")
+ax4.set_xlabel("Day")
+ax4.set_ylabel("Flux components [W/m$^2$]")
+ax4.set_title("Beam vs. Diffuse flux")
+ax4.legend()
+ax4.grid()
