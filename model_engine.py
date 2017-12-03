@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Nov 25 17:39:30 2017
-
-@author: Omer Luria
-Version 0.03
+@ Omer Luria
+luriomer@gmail.com 
+Tel-Aviv University
+Version 0.05, Dec 2017
 
 This simulation calculates solar insulation in desired location throughout the year, and generated
-graphic results. In this case the location chosen was Las Vegas, NV.
-The current model takes into account constant surface direction.
+graphic results.
+
+This is the runner file. Run it with the desired parameters, in the same folder with the engine.
 """
 #%%
 from __future__ import division
