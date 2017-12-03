@@ -41,7 +41,7 @@ def Hottel_coeff(days,summer_start,summer_end,A):
     return [a0,a1,k]
 
 #%%
-def main_flux_calc(days,hours,phi,G0,surf_normal,delta,a0,a1,k):
+def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A):#,a0,a1,k):
     ''' Preperation of array variables '''
     shape = [len(days),len(hours)] # General array matrix shape [days and hours]
     sun_vec = np.zeros([3,len(days),len(hours)])
@@ -55,6 +55,10 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,a0,a1,k):
     Gb_av = np.zeros_like(days, dtype=float) # Beam average flux
     Gd_av = np.zeros_like(days, dtype=float) # Diffuse average flux
     Gav_hr = np.zeros_like(hours, dtype=float)# Hourly average flux
+    Hottel = Hottel_coeff(days,summer_start,summer_end,A)
+    a0 = Hottel[0]
+    a1 = Hottel[1]
+    k = Hottel[2]
     
     ''' Calculation of daily parameters '''
     delta_t_solar = hours-12
@@ -96,7 +100,7 @@ def annual_calc(empirical_path,Gtot):
 def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr):
     delta_t_solar=hours-12
     ''' Plotting the results '''
-    plt.close('all')
+    #plt.close('all')
     
     fig1 = plt.figure()
     fig1.suptitle("Simulation results for "+location_name+"\nSurface normal (local coordinates) = "

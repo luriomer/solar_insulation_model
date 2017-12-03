@@ -13,7 +13,7 @@ The current model takes into account constant surface direction.
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
-from model_engine import surface_normal_calc,Hottel_coeff,main_flux_calc,annual_calc,plotter
+from model_engine import surface_normal_calc,main_flux_calc,annual_calc,plotter
 
 #%%
 ''' Las Vegas and universal parameters '''
@@ -33,24 +33,15 @@ surf_normal = surface_normal_calc(0,2,0)
 #%%
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
-hours = np.arange(7,18,1)
+hours = np.arange(7,18,1) # Daylight hours
 B = (2*np.pi*(days-1)/365)*np.pi/180 # Assisting parameter [rad]
-
 
 #%%
 ''' Calculation of declination angle '''
 delta = axial_tilt*np.sin((B-80*2*np.pi/365)*np.pi/180) #Declination angle [rad]
 
-
-
 #%%
-Hottel = Hottel_coeff(days,summer_start,summer_end,A)
-a0 = Hottel[0]
-a1 = Hottel[1]
-k = Hottel[2]
-
-#%%
-main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,a0,a1,k)
+main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A)#,a0,a1,k)
 Gb = main_calc[0]
 Gd = main_calc[1]
 Gtot = main_calc[2]
@@ -66,4 +57,5 @@ E_sim = annual[1]
 E_emp = annual[2]
 
 #%%
+plt.close('all')
 plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr)
