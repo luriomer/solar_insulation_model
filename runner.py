@@ -32,9 +32,8 @@ empirical_data_path = 'empirical_data.txt'
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
-hours = np.arange(6,19,1) # Daylight hours
-B = (2*np.pi*(days-1)/365)*np.pi/180 # Assisting parameter [rad]
-delta = axial_tilt*np.sin((B-80*2*np.pi/365)*np.pi/180) #Declination angle [rad]
+hours = np.arange(0,25,1) # Hours throughout the day
+delta = axial_tilt*np.sin(((days-81)*2*np.pi/365)) #Declination angle [rad]
 
 
 ''' Calling the primary engine process '''
@@ -46,7 +45,6 @@ Gav_day = main_calc[3]
 Gb_av = main_calc[4]
 Gd_av = main_calc[5]
 Gav_hr = main_calc[6]
-cos_theta = main_calc[7]
 
 annual = annual_calc(empirical_data_path,Gtot) #
 Gav_emp = annual[0]

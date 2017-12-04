@@ -49,6 +49,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     shape = [len(days),len(hours)] # General array matrix shape [days and hours]
     sun_vec = np.zeros([3,len(days),len(hours)])
     cos_theta = np.zeros(shape, dtype=float)
+    cos_zenith = np.zeros(shape, dtype=float)
     tau_b = np.zeros(shape, dtype=float)
     tau_d = np.zeros(shape, dtype=float)
     Gb = np.zeros(shape, dtype=float) # Beam flux (instant)
@@ -75,8 +76,8 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
             sun_vec[1,i,j] = np.cos(delta[i])*np.sin(omega[j])
             sun_vec[2,i,j] = np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i])
             cos_theta[i,j] = (np.dot(sun_vec[:,i,j],surf_normal))/(np.linalg.norm(sun_vec[:,i,j])*np.linalg.norm(surf_normal))
-            #zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
-            tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_theta[i,j])),0)
+            cos_zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
+            tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_zenith[i,j])),0)
             Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0)
             tau_d[i,j] = max((cos_theta[i,j]*(0.271-0.294*tau_b[i,j])),0)
             Gd[i,j] = max((G0*tau_d[i,j]*cos_theta[i,j]),0)
@@ -88,7 +89,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     for j in range(len(hours)):
         Gav_hr[j] = np.average(Gtot[:,j])
         
-    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr,cos_theta)
+    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr)
 #%%
 
 def annual_calc(empirical_path,Gtot):
@@ -112,10 +113,10 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
              " , E$_{empirical}$ = "+str(E_emp)+"["+r'$\frac{MWh}{m^2}$'+"]" ,fontweight = "bold", fontsize=12)
     ax1 = fig1.add_subplot(221)
     ax1.plot(days,Gav_day, label = "Simulation")
-    ax1.plot(days,Gav_emp*2, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
+    ax1.plot(days,Gav_emp, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
     ax1.set_xlabel("Day")
     ax1.set_ylabel("Average flux ["+r'$\frac{W}{m^2}$'+"]")
-    ax1.set_title("Average daily flux based on 12 hours of daylight")
+    ax1.set_title("Average daily flux (based on 24 hours)")
     ax1.legend()
     ax1.grid()
     
@@ -131,7 +132,7 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     ax3 = fig1.add_subplot(223)
     
     ax3.plot(hours,Gav_hr)
-    ax3.set_xlabel("Hour")
+    ax3.set_xlabel("Solar Hour")
     ax3.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
     ax3.set_title("Average hourly flux")
     ax3.legend()
