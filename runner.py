@@ -25,23 +25,20 @@ L = 115     # Actual longtitude line (west) [deg]
 phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
-summer_start = 171 # First day of summer [days, 1 = Jan 1st]. In Las-Vegas June 21
-summer_end = 262 # Last day of summer [days, 1 = Jan 1st]. In Las-Vegas Sep 22
+summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
+surf_normal = surface_normal_calc(0,2,0) #Change normal direction as needed
+empirical_data_path = 'empirical_insulation.txt'
+
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
 hours = np.arange(7,18,1) # Daylight hours
 B = (2*np.pi*(days-1)/365)*np.pi/180 # Assisting parameter [rad]
-
-''' Calling surface normal calculation function '''
-surf_normal = surface_normal_calc(0,2,0)
-
-
-''' Calculation of declination angle '''
 delta = axial_tilt*np.sin((B-80*2*np.pi/365)*np.pi/180) #Declination angle [rad]
 
+
 ''' Calling the primary engine process '''
-main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A)#,a0,a1,k)
+main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer[0],summer[1],A)#,a0,a1,k)
 Gb = main_calc[0]
 Gd = main_calc[1]
 Gtot = main_calc[2]
@@ -50,10 +47,11 @@ Gb_av = main_calc[4]
 Gd_av = main_calc[5]
 Gav_hr = main_calc[6]
 
-annual = annual_calc('empirical_insulation.txt',Gtot)
+annual = annual_calc(empirical_data_path,Gtot) #
 Gav_emp = annual[0]
 E_sim = annual[1]
 E_emp = annual[2]
+
 
 ''' Calling the plotter function to plot the results '''
 plt.close('all')
