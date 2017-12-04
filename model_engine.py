@@ -42,7 +42,7 @@ def Hottel_coeff(days,summer_start,summer_end,A):
     return [a0,a1,k]
 
 #%%
-def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A):#,a0,a1,k):
+def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A):
     ''' Preperation of array variables '''
     shape = [len(days),len(hours)] # General array matrix shape [days and hours]
     sun_vec = np.zeros([3,len(days),len(hours)])
