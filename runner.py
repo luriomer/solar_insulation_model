@@ -32,7 +32,7 @@ empirical_data_path = 'empirical_data.txt'
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
-hours = np.arange(0,25,1) # Hours throughout the day
+hours = np.arange(0,25,1) # Hours throughout the day (already in solar time!)
 delta = axial_tilt*np.sin(((days-81)*2*np.pi/365)) #Declination angle [rad]
 
 

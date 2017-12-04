@@ -96,7 +96,7 @@ def annual_calc(empirical_path,Gtot):
     ''' Importing empirical data '''
     Gav_emp = np.loadtxt(empirical_path)
     ''' Calculation of total annual solar energy (average) '''
-    E_sim = round(np.sum(Gtot,dtype=np.float)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh.
+    E_sim = round(np.sum(Gtot,dtype=np.float)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh/m^2.
     E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 24 hours.
     return [Gav_emp,E_sim,E_emp]
 
@@ -121,7 +121,7 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     ax1.grid()
     
     ax2 = fig1.add_subplot(222)
-    for i in range(len(delta_t_solar)):
+    for i in range(int(0.5*len(delta_t_solar)-6),int(0.5*len(delta_t_solar)+6)):
         ax2.plot(days,Gtot[:,i],label = "$\Delta$"+"$t_{solar}$ = "+str(delta_t_solar[i]))
         ax2.set_xlabel("Day")
         ax2.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
