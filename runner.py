@@ -18,7 +18,7 @@ from model_engine import surface_normal_calc,main_flux_calc,annual_calc,plotter
 
 
 ''' Analysis parameters: change as neccessary'''
-location_name = "Las-Vegas, NV"
+location_name = "Las-Vegas, Nevada"
 axial_tilt = 23.45*(np.pi/180) # Earth axial tilt angle [rad]
 L_std = 120 # Standart longtitude line (west) [deg]
 L = 115     # Actual longtitude line (west) [deg]
@@ -26,13 +26,13 @@ phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
-surf_normal = surface_normal_calc(0,2,0) #Change normal direction as needed
-empirical_data_path = 'empirical_insulation.txt'
+surf_normal = surface_normal_calc(0,0,1) #Change normal direction as needed
+empirical_data_path = 'empirical_data.txt'
 
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
-hours = np.arange(7,18,1) # Daylight hours
+hours = np.arange(6,19,1) # Daylight hours
 B = (2*np.pi*(days-1)/365)*np.pi/180 # Assisting parameter [rad]
 delta = axial_tilt*np.sin((B-80*2*np.pi/365)*np.pi/180) #Declination angle [rad]
 
@@ -46,6 +46,7 @@ Gav_day = main_calc[3]
 Gb_av = main_calc[4]
 Gd_av = main_calc[5]
 Gav_hr = main_calc[6]
+cos_theta = main_calc[7]
 
 annual = annual_calc(empirical_data_path,Gtot) #
 Gav_emp = annual[0]

@@ -43,6 +43,8 @@ def Hottel_coeff(days,summer_start,summer_end,A):
 
 #%%
 def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A):
+    ''' Calculation of flux in different times during the day using the correlations'''
+
     ''' Preperation of array variables '''
     shape = [len(days),len(hours)] # General array matrix shape [days and hours]
     sun_vec = np.zeros([3,len(days),len(hours)])
@@ -65,8 +67,8 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     delta_t_solar = hours-12
     omega = (delta_t_solar*360/(24))*np.pi/180 #Hour angle [rad]
     
-    ''' Calculation of flux in different times during the day using the correlations'''
-    
+
+    ''' Main calculation loops '''
     for i in range(len(days)):
         for j in range(len(delta_t_solar)):
             sun_vec[0,i,j] = -np.sin(phi)*np.cos(delta[i])*np.cos(omega[j])+np.cos(phi)*np.sin(delta[i])
@@ -79,22 +81,22 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
             tau_d[i,j] = max((cos_theta[i,j]*(0.271-0.294*tau_b[i,j])),0)
             Gd[i,j] = max((G0*tau_d[i,j]*cos_theta[i,j]),0)
             Gtot[i,j] = Gb[i,j] + Gd[i,j]
-        Gav_day[i] = np.average(Gtot[i])
+        Gav_day[i] = np.average(Gtot[i,:])
         Gb_av[i] = np.average(Gb[i])
         Gd_av[i] = np.average(Gd[i])
     
     for j in range(len(hours)):
         Gav_hr[j] = np.average(Gtot[:,j])
         
-    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr)
+    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr,cos_theta)
 #%%
 
 def annual_calc(empirical_path,Gtot):
     ''' Importing empirical data '''
     Gav_emp = np.loadtxt(empirical_path)
     ''' Calculation of total annual solar energy (average) '''
-    E_sim = round(np.sum(Gtot)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh.
-    E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 12 hours of insulation.
+    E_sim = round(np.sum(Gtot,dtype=np.float)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh.
+    E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 24 hours.
     return [Gav_emp,E_sim,E_emp]
 
 #%%
@@ -104,27 +106,24 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     #plt.close('all')
     
     fig1 = plt.figure()
-    fig1.suptitle("Simulation results for "+location_name+"\nSurface normal (local coordinates) = "
-                  +str(surf_normal), fontweight = "bold", fontsize=18)
+    fig1.suptitle("Location: "+location_name+"\nSurface normal (local coordinates) = "
+                  +str(surf_normal)+"\n"+"Total annual energy:"
+             " E$_{simulation}$ =  "+str(E_sim)+"["+r'$\frac{MWh}{m^2}$'+"]"
+             " , E$_{empirical}$ = "+str(E_emp)+"["+r'$\frac{MWh}{m^2}$'+"]" ,fontweight = "bold", fontsize=12)
     ax1 = fig1.add_subplot(221)
     ax1.plot(days,Gav_day, label = "Simulation")
     ax1.plot(days,Gav_emp*2, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
     ax1.set_xlabel("Day")
-    ax1.set_ylabel("Average flux [W/m$^2$]")
+    ax1.set_ylabel("Average flux ["+r'$\frac{W}{m^2}$'+"]")
     ax1.set_title("Average daily flux based on 12 hours of daylight")
-    ax1.annotate("Total annual energy per unit area: \n "+
-             "--------------------------------------------------\n"+
-             "Theoretical (simulation) E = "+str(E_sim)+" [MWh/m$^2$] \n"+
-             "Empirical (atmospheric data) E = "+str(E_emp)+" [MWh/m$^2$]", 
-             fontsize = 11, color="red", fontweight = "bold", xy=(70, 240))
     ax1.legend()
     ax1.grid()
     
     ax2 = fig1.add_subplot(222)
     for i in range(len(delta_t_solar)):
-        ax2.plot(days,Gtot[:,i],label = "$\Delta$t solar = "+str(delta_t_solar[i]))
+        ax2.plot(days,Gtot[:,i],label = "$\Delta$"+"$t_{solar}$ = "+str(delta_t_solar[i]))
         ax2.set_xlabel("Day")
-        ax2.set_ylabel("Total flux [W/m$^2$]")
+        ax2.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
         ax2.set_title("Total daily flux")
         ax2.legend()
         ax2.grid()
@@ -133,7 +132,7 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     
     ax3.plot(hours,Gav_hr)
     ax3.set_xlabel("Hour")
-    ax3.set_ylabel("Total flux [W/m$^2$]")
+    ax3.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
     ax3.set_title("Average hourly flux")
     ax3.legend()
     ax3.grid()
@@ -142,8 +141,8 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     ax4.plot(days,Gb_av, label = "Beam")
     ax4.plot(days,Gd_av, label = "Diffuse")
     ax4.set_xlabel("Day")
-    ax4.set_ylabel("Flux components [W/m$^2$]")
-    ax4.set_title("Beam vs. Diffuse flux")
+    ax4.set_ylabel("Average flux components ["+r'$\frac{W}{m^2}$'+"]")
+    ax4.set_title("Average beam vs. diffuse flux")
     ax4.legend()
     ax4.grid()
     return
