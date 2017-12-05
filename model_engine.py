@@ -115,7 +115,7 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     ax1.plot(days,Gav_day, label = "Simulation")
     ax1.plot(days,Gav_emp, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
     ax1.set_xlabel("Day")
-    ax1.set_ylabel("Average flux ["+r'$\frac{W}{m^2}$'+"]")
+    ax1.set_ylabel("Average total flux ["+r'$\frac{W}{m^2}$'+"]")
     ax1.set_title("Average daily flux (based on 24 hours)")
     ax1.legend()
     ax1.grid()
@@ -130,11 +130,11 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
         ax2.grid()
     
     ax3 = fig1.add_subplot(223)
-    
-    ax3.plot(hours,Gav_hr)
+    for i in range(0,len(days),30):
+        ax3.plot(hours,Gtot[i,:], label ="Day ="+str(days[i]))
     ax3.set_xlabel("Solar Hour")
     ax3.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
-    ax3.set_title("Average hourly flux")
+    ax3.set_title("Hourly flux")
     ax3.legend()
     ax3.grid()
     
