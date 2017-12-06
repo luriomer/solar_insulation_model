@@ -79,7 +79,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
             cos_zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
             tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_zenith[i,j])),0)
             Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0)
-            tau_d[i,j] = max((cos_theta[i,j]*(0.271-0.294*tau_b[i,j])),0)
+            tau_d[i,j] = max((cos_zenith[i,j]*(0.271-0.294*tau_b[i,j])),0)
             Gd[i,j] = max((G0*tau_d[i,j]*cos_theta[i,j]),0)
             Gtot[i,j] = Gb[i,j] + Gd[i,j]
         Gav_day[i] = np.average(Gtot[i,:])
