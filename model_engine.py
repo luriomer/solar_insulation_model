@@ -42,7 +42,7 @@ def Hottel_coeff(days,summer_start,summer_end,A):
     return [a0,a1,k]
 
 #%%
-def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A):
+def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A,two_axis_tracking):
     ''' Calculation of flux in different times during the day using the correlations'''
 
     ''' Preperation of array variables '''
@@ -75,8 +75,11 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
             sun_vec[0,i,j] = -np.sin(phi)*np.cos(delta[i])*np.cos(omega[j])+np.cos(phi)*np.sin(delta[i])
             sun_vec[1,i,j] = np.cos(delta[i])*np.sin(omega[j])
             sun_vec[2,i,j] = np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i])
-            cos_theta[i,j] = (np.dot(sun_vec[:,i,j],surf_normal))/(np.linalg.norm(sun_vec[:,i,j])*np.linalg.norm(surf_normal))
             cos_zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
+            if two_axis_tracking:
+                cos_theta[i,j] = cos_zenith[i,j]
+            else:
+                cos_theta[i,j] = (np.dot(sun_vec[:,i,j],surf_normal))/(np.linalg.norm(sun_vec[:,i,j])*np.linalg.norm(surf_normal))
             tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_zenith[i,j])),0)
             Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0)
             tau_d[i,j] = max((cos_zenith[i,j]*(0.271-0.294*tau_b[i,j])),0)
@@ -101,13 +104,15 @@ def annual_calc(empirical_path,Gtot):
     return [Gav_emp,E_sim,E_emp]
 
 #%%
-def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr):
+def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr,two_axis_tracking):
     delta_t_solar=hours-12
     ''' Plotting the results '''
     #plt.close('all')
     
     fig1 = plt.figure()
-    fig1.suptitle("Location: "+location_name+"\nSurface normal (local coordinates) = "
+    if two_axis_tracking:
+        surf_normal = "Two axis surface"
+    fig1.suptitle("Location: "+location_name+"\nSurface normal (local coordinates) --> "
                   +str(surf_normal)+"\n"+"Total annual energy:"
              " E$_{simulation}$ =  "+str(E_sim)+"["+r'$\frac{MWh}{m^2}$'+"]"
              " , E$_{empirical}$ = "+str(E_emp)+"["+r'$\frac{MWh}{m^2}$'+"]" ,fontweight = "bold", fontsize=12)
@@ -115,7 +120,7 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     ax1.plot(days,Gav_day, label = "Simulation")
     ax1.plot(days,Gav_emp, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
     ax1.set_xlabel("Day")
-    ax1.set_ylabel("Average total flux ["+r'$\frac{W}{m^2}$'+"]")
+    ax1.set_ylabel("Average global flux ["+r'$\frac{W}{m^2}$'+"]")
     ax1.set_title("Average daily flux (based on 24 hours)")
     ax1.legend()
     ax1.grid()
@@ -124,8 +129,8 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     for i in range(int(0.5*len(delta_t_solar)-6),int(0.5*len(delta_t_solar)+6)):
         ax2.plot(days,Gtot[:,i],label = "$\Delta$"+"$t_{solar}$ = "+str(delta_t_solar[i]))
         ax2.set_xlabel("Day")
-        ax2.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
-        ax2.set_title("Total daily flux")
+        ax2.set_ylabel("Global flux ["+r'$\frac{W}{m^2}$'+"]")
+        ax2.set_title("Hours through the year")
         ax2.legend()
         ax2.grid()
     
@@ -133,8 +138,8 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     for i in range(0,len(days),30):
         ax3.plot(hours,Gtot[i,:], label ="Day ="+str(days[i]))
     ax3.set_xlabel("Solar Hour")
-    ax3.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
-    ax3.set_title("Hourly flux")
+    ax3.set_ylabel("Global flux ["+r'$\frac{W}{m^2}$'+"]")
+    ax3.set_title("Hours through the day")
     ax3.legend()
     ax3.grid()
     

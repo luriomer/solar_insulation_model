@@ -28,7 +28,7 @@ A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
 surf_normal = surface_normal_calc(0,0,1) #Change normal direction as needed
 empirical_data_path = 'empirical_data.txt'
-
+two_axis_tracking = True
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
@@ -37,7 +37,7 @@ delta = axial_tilt*np.sin(((days-81)*2*np.pi/365)) #Declination angle [rad]
 
 
 ''' Calling the primary engine process '''
-main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer[0],summer[1],A)#,a0,a1,k)
+main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer[0],summer[1],A,two_axis_tracking)
 Gb = main_calc[0]
 Gd = main_calc[1]
 Gtot = main_calc[2]
@@ -54,4 +54,4 @@ E_emp = annual[2]
 
 ''' Calling the plotter function to plot the results '''
 plt.close('all')
-plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr)
+plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr,two_axis_tracking)
