@@ -27,7 +27,6 @@ G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
 panel_south_angle = 31 # Panel angle to the south (about ~31 is optimal, like in Israel) [deg]
-surf_normal = surface_normal_calc(-np.tan(panel_south_angle*(np.pi/180)),0,1)
 empirical_data_path = 'empirical_insulation.txt'
 two_axis_tracking = False
 
@@ -35,7 +34,7 @@ two_axis_tracking = False
 days = np.arange(1,366,1) # Days throughout the year
 hours = np.arange(0,25,1) # Hours throughout the day (already in solar time!)
 delta = axial_tilt*np.sin(((days-81)*2*np.pi/365)) #Declination angle [rad]
-
+surf_normal = surface_normal_calc(-np.tan(panel_south_angle*(np.pi/180)),0,1) # To use the degree attribute, must be yL=0 and zL=0.
 
 ''' Calling the primary engine process '''
 main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer[0],summer[1],A,two_axis_tracking)
