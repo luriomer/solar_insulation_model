@@ -26,9 +26,9 @@ phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
-surf_normal = surface_normal_calc(0,0,1) #Change normal direction as needed
-empirical_data_path = 'empirical_data.txt'
-two_axis_tracking = True
+surf_normal = surface_normal_calc(-1,0,1) #Change normal direction as needed
+empirical_data_path = 'empirical_insulation.txt'
+two_axis_tracking = False
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
@@ -45,8 +45,10 @@ Gav_day = main_calc[3]
 Gb_av = main_calc[4]
 Gd_av = main_calc[5]
 Gav_hr = main_calc[6]
+cos_theta = main_calc[7]
+tau_b = main_calc[8]
 
-annual = annual_calc(empirical_data_path,Gtot) #
+annual = annual_calc(empirical_data_path,Gtot)
 Gav_emp = annual[0]
 E_sim = annual[1]
 E_emp = annual[2]
@@ -55,3 +57,7 @@ E_emp = annual[2]
 ''' Calling the plotter function to plot the results '''
 plt.close('all')
 plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr,two_axis_tracking)
+
+
+''' Save the results to tsv .txt files inside a results folder in the local directory '''
+np.savetxt("results/Gtot.txt",Gtot)

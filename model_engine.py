@@ -18,7 +18,8 @@ import matplotlib.pyplot as plt
 #%%
 def surface_normal_calc(xL,yL,zL):
     ''' Surface normal direction vector. Everything in local coordinates. '''
-    surf_normal_local = np.array([xL,yL,zL])/np.sqrt(xL**2+yL**2+zL**2) #Normalization
+    surf_normal_local = np.array([xL,yL,zL])
+    surf_normal_local = surf_normal_local/np.linalg.norm(surf_normal_local) #Normalization
     return surf_normal_local
 
 #%%
@@ -47,7 +48,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
 
     ''' Preperation of array variables '''
     shape = [len(days),len(hours)] # General array matrix shape [days and hours]
-    sun_vec = np.zeros([3,len(days),len(hours)])
+    sun_vec = np.zeros([3,len(days),len(hours)], dtype=float)
     cos_theta = np.zeros(shape, dtype=float)
     cos_zenith = np.zeros(shape, dtype=float)
     tau_b = np.zeros(shape, dtype=float)
@@ -65,34 +66,37 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     k = Hottel[2]
     
     ''' Calculation of daily parameters '''
-    delta_t_solar = hours-12
+    delta_t_solar = hours-12 #Solar noon difference [hours]
     omega = (delta_t_solar*360/(24))*np.pi/180 #Hour angle [rad]
     
 
     ''' Main calculation loops '''
     for i in range(len(days)):
-        for j in range(len(delta_t_solar)):
+        for j in range(len(hours)):
             sun_vec[0,i,j] = -np.sin(phi)*np.cos(delta[i])*np.cos(omega[j])+np.cos(phi)*np.sin(delta[i])
             sun_vec[1,i,j] = np.cos(delta[i])*np.sin(omega[j])
             sun_vec[2,i,j] = np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i])
             cos_zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
             if two_axis_tracking:
-                cos_theta[i,j] = cos_zenith[i,j]
+                cos_theta[i,j] = 1.0
             else:
                 cos_theta[i,j] = (np.dot(sun_vec[:,i,j],surf_normal))/(np.linalg.norm(sun_vec[:,i,j])*np.linalg.norm(surf_normal))
-            tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_zenith[i,j])),0)
-            Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0)
-            tau_d[i,j] = max((cos_zenith[i,j]*(0.271-0.294*tau_b[i,j])),0)
-            Gd[i,j] = max((G0*tau_d[i,j]*cos_theta[i,j]),0)
+            if cos_zenith[i,j] > 0:
+                tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_zenith[i,j])),0.0)
+            else:
+                tau_b[i,j] = 0
+            Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0.0)
+            tau_d[i,j] = max((0.271-0.294*tau_b[i,j]),0.0)
+            Gd[i,j] = max((G0*tau_d[i,j]*cos_zenith[i,j]),0.0)
             Gtot[i,j] = Gb[i,j] + Gd[i,j]
-        Gav_day[i] = np.average(Gtot[i,:])
+        Gav_day[i] = np.average(Gtot[i])
         Gb_av[i] = np.average(Gb[i])
         Gd_av[i] = np.average(Gd[i])
     
     for j in range(len(hours)):
         Gav_hr[j] = np.average(Gtot[:,j])
         
-    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr)
+    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr,cos_theta,tau_b)
 #%%
 
 def annual_calc(empirical_path,Gtot):
@@ -152,4 +156,3 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     ax4.legend()
     ax4.grid()
     return
-#%%
