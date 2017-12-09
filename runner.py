@@ -26,7 +26,7 @@ phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
-panel_south_angle = 31 # Panel angle to the south (about ~31 is optimal, like in Israel) [deg]
+panel_south_angle = 32 # Panel angle to the south (about ~31 is optimal, like in Israel) [deg]
 empirical_data_path = 'empirical_insulation.txt'
 two_axis_tracking = False
 

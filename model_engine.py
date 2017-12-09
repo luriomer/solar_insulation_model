@@ -84,7 +84,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
             if cos_zenith[i,j] > 0:
                 tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_zenith[i,j])),0.0)
             else:
-                tau_b[i,j] = 0
+                tau_b[i,j] = a0[i]
             Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0.0)
             tau_d[i,j] = max((0.271-0.294*tau_b[i,j]),0.0)
             Gd[i,j] = max((G0*tau_d[i,j]*cos_zenith[i,j]),0.0)
@@ -115,9 +115,11 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     
     fig1 = plt.figure()
     if two_axis_tracking:
-        panel_south_angle = "Two axis surface"
-    fig1.suptitle("Location: "+location_name+"\nSurface angle to the south = "
-                  +str(panel_south_angle)+"$\degree$"+"\n"+"Total annual energy:"
+        panel_south_angle = "Two axis tracking"
+    else:
+        panel_south_angle = str(panel_south_angle)+"$\degree$"+" to the south"
+    fig1.suptitle("Location: "+location_name+"\nSurface orientation: "
+                  +str(panel_south_angle)+"\n"+"Total annual energy:"
              " E$_{simulation}$ =  "+str(E_sim)+"["+r'$\frac{MWh}{m^2}$'+"]"
              " , E$_{empirical}$ = "+str(E_emp)+"["+r'$\frac{MWh}{m^2}$'+"]" ,fontweight = "bold", fontsize=12)
     ax1 = fig1.add_subplot(221)
