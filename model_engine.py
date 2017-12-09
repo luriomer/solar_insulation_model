@@ -103,21 +103,21 @@ def annual_calc(empirical_path,Gtot):
     ''' Importing empirical data '''
     Gav_emp = np.loadtxt(empirical_path)
     ''' Calculation of total annual solar energy (average) '''
-    E_sim = round(np.sum(Gtot,dtype=np.float)/1e6 ,2) # Here we have all the data so simply sum it all and change it to MWh/m^2.
-    E_emp = round(np.sum(Gav_emp)*24/1e6,2) # Multiply every day average by 24 hours.
+    E_sim = round(np.sum(Gtot,dtype=np.float)/1e6 ,4) # Here we have all the data so simply sum it all and change it to MWh/m^2.
+    E_emp = round(np.sum(Gav_emp)*24/1e6,4) # Multiply every day average by 24 hours.
     return [Gav_emp,E_sim,E_emp]
 
 #%%
-def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr,two_axis_tracking):
+def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr,two_axis_tracking,panel_south_angle):
     delta_t_solar=hours-12
     ''' Plotting the results '''
     #plt.close('all')
     
     fig1 = plt.figure()
     if two_axis_tracking:
-        surf_normal = "Two axis surface"
-    fig1.suptitle("Location: "+location_name+"\nSurface normal (local coordinates) --> "
-                  +str(surf_normal)+"\n"+"Total annual energy:"
+        panel_south_angle = "Two axis surface"
+    fig1.suptitle("Location: "+location_name+"\nSurface angle to the south = "
+                  +str(panel_south_angle)+"$\degree$"+"\n"+"Total annual energy:"
              " E$_{simulation}$ =  "+str(E_sim)+"["+r'$\frac{MWh}{m^2}$'+"]"
              " , E$_{empirical}$ = "+str(E_emp)+"["+r'$\frac{MWh}{m^2}$'+"]" ,fontweight = "bold", fontsize=12)
     ax1 = fig1.add_subplot(221)

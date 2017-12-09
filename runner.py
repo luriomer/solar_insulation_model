@@ -26,7 +26,8 @@ phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
-surf_normal = surface_normal_calc(-0.5,0,1) #Change normal direction as needed. Looks like (-0.5,0,1) is optimal!
+panel_south_angle = 31 # Panel angle to the south (about ~31 is optimal, like in Israel) [deg]
+surf_normal = surface_normal_calc(-np.tan(panel_south_angle*(np.pi/180)),0,1)
 empirical_data_path = 'empirical_insulation.txt'
 two_axis_tracking = False
 
@@ -56,7 +57,7 @@ E_emp = annual[2]
 
 ''' Calling the plotter function to plot the results '''
 plt.close('all')
-plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr,two_axis_tracking)
+plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr,two_axis_tracking,panel_south_angle)
 
 
 ''' Save the results to tsv .txt files inside a results folder in the local directory '''
