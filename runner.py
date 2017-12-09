@@ -28,7 +28,7 @@ A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
 panel_south_angle = 32 # Panel angle to the south (about ~31 is optimal, like in Israel) [deg]
 empirical_data_path = 'empirical_insulation.txt'
-two_axis_tracking = False
+two_axis_tracking = False # Two axis tracking configuration. Overrides the panel angle.
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year

@@ -121,7 +121,7 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     fig1.suptitle("Location: "+location_name+"\nSurface orientation: "
                   +str(panel_south_angle)+"\n"+"Total annual energy:"
              " E$_{simulation}$ =  "+str(E_sim)+"["+r'$\frac{MWh}{m^2}$'+"]"
-             " , E$_{empirical}$ = "+str(E_emp)+"["+r'$\frac{MWh}{m^2}$'+"]" ,fontweight = "bold", fontsize=12)
+             " , E$_{empirical}$ = "+str(E_emp)+"["+r'$\frac{MWh}{m^2}$'+"]" ,fontweight = "bold", fontsize=14)
     ax1 = fig1.add_subplot(221)
     ax1.plot(days,Gav_day, label = "Simulation")
     ax1.plot(days,Gav_emp, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
