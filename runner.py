@@ -26,7 +26,7 @@ phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1367 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
-surf_normal = surface_normal_calc(-1,0,1) #Change normal direction as needed
+surf_normal = surface_normal_calc(-0.5,0,1) #Change normal direction as needed. Looks like (-0.5,0,1) is optimal!
 empirical_data_path = 'empirical_insulation.txt'
 two_axis_tracking = False
 

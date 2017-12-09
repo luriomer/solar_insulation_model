@@ -8,7 +8,7 @@ Version 0.05, Dec 2017
 This simulation calculates solar insulation in desired location throughout the year, and generated
 graphic results.
 
-This is the runner file. Run it with the desired parameters, in the same folder with the engine.
+This is the engine file.
 """
 #%%
 from __future__ import division
