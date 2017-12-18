@@ -84,7 +84,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
             if cos_zenith[i,j] > 0:
                 tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_zenith[i,j])),0.0)
             else:
-                tau_b[i,j] = a0[i]
+                tau_b[i,j] = a0[i]*np.exp(10*cos_zenith[i,j])
             Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0.0)
             tau_d[i,j] = max((0.271-0.294*tau_b[i,j]),0.0)
             Gd[i,j] = max((G0*tau_d[i,j]*cos_zenith[i,j]),0.0)
@@ -96,7 +96,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     for j in range(len(hours)):
         Gav_hr[j] = np.average(Gtot[:,j])
         
-    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr,cos_theta,tau_b)
+    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr,cos_theta,tau_b,tau_d)
 #%%
 
 def annual_calc(empirical_path,Gtot):
@@ -137,8 +137,8 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
         ax2.set_xlabel("Day")
         ax2.set_ylabel("Global flux ["+r'$\frac{W}{m^2}$'+"]")
         ax2.set_title("Hours through the year")
-        ax2.legend()
-        ax2.grid()
+    ax2.legend(loc='right')
+    ax2.grid()
     
     ax3 = fig1.add_subplot(223)
     for i in range(0,len(days),30):

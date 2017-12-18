@@ -23,10 +23,10 @@ axial_tilt = 23.45*(np.pi/180) # Earth axial tilt angle [rad]
 L_std = 120 # Standart longtitude line (west) [deg]
 L = 115     # Actual longtitude line (west) [deg]
 phi = 36*(np.pi/180) #Latitude line (north) [rad]
-G0 = 1367 # Solar constant [W/m**2]
+G0 = 1362 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
 summer = [171,262] # Summer priod [start,end] [1 = Jan 1st]. In Las-Vegas June 21 - Sep 22
-panel_south_angle = 32 # Panel angle to the south (about ~31 is optimal, like in Israel) [deg]
+panel_south_angle = 0 # Panel angle to the south (about ~31 is optimal, like in Israel) [deg]
 empirical_data_path = 'empirical_insulation.txt'
 two_axis_tracking = False # Two axis tracking configuration. Overrides the panel angle.
 
@@ -47,6 +47,7 @@ Gd_av = main_calc[5]
 Gav_hr = main_calc[6]
 cos_theta = main_calc[7]
 tau_b = main_calc[8]
+tau_d = main_calc[9]
 
 annual = annual_calc(empirical_data_path,Gtot)
 Gav_emp = annual[0]
