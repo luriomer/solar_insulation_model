@@ -43,7 +43,12 @@ def Hottel_coeff(days,summer_start,summer_end,A):
     return [a0,a1,k]
 
 #%%
-def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A,two_axis_tracking):
+def Klein(kT_path):
+    ''' Calculation of Klein correlation according to kT datafile '''
+    kT = np.loadtxt(kT_path)
+    return (1.390 - 4.027*kT+5.53*kT**2-3.108*kT**3)
+#%%
+def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A,two_axis_tracking,Ipart):
     ''' Calculation of flux in different times during the day using the correlations'''
 
     ''' Preperation of array variables '''
@@ -53,13 +58,16 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     cos_zenith = np.zeros(shape, dtype=float)
     tau_b = np.zeros(shape, dtype=float)
     tau_d = np.zeros(shape, dtype=float)
-    Gb = np.zeros(shape, dtype=float) # Beam flux (instant)
-    Gd = np.zeros(shape, dtype=float) # Diffuse flux (instant)
-    Gtot = np.zeros(shape, dtype=float) # Total flux (instant)
-    Gav_day = np.zeros_like(days, dtype=float) # Daily average flux
-    Gb_av = np.zeros_like(days, dtype=float) # Beam average flux
-    Gd_av = np.zeros_like(days, dtype=float) # Diffuse average flux
-    Gav_hr = np.zeros_like(hours, dtype=float)# Hourly average flux
+    Gb = np.zeros(shape, dtype=float) # Beam flux - clear day
+    Gd = np.zeros(shape, dtype=float) # Diffuse flux - clear day
+    G_glob = np.zeros(shape, dtype=float) # Global flux - clear day
+    qb = np.zeros(shape, dtype=float) # Beam flux - nonclear consideration
+    qd = np.zeros(shape, dtype=float) # Diffuse flux - nonclear consideration
+    qtot = np.zeros(shape, dtype=float) # Total flux - nonclear consideration
+    qav_day = np.zeros_like(days, dtype=float) # Daily average flux
+    qb_av = np.zeros_like(days, dtype=float) # Beam average flux
+    qd_av = np.zeros_like(days, dtype=float) # Diffuse average flux
+    qav_hr = np.zeros_like(hours, dtype=float)# Hourly average flux
     Hottel = Hottel_coeff(days,summer_start,summer_end,A)
     a0 = Hottel[0]
     a1 = Hottel[1]
@@ -84,31 +92,34 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
             if cos_zenith[i,j] > 0:
                 tau_b[i,j] =max((a0[i]+a1[i]*np.exp(-k[i]/cos_zenith[i,j])),0.0)
             else:
-                tau_b[i,j] = a0[i]*np.exp(10*cos_zenith[i,j])
-            Gb[i,j] = max((G0*tau_b[i,j]*cos_theta[i,j]),0.0)
+                tau_b[i,j] = a0[i]
+            Gb[i,j] = max((G0*tau_b[i,j]),0.0)
             tau_d[i,j] = max((0.271-0.294*tau_b[i,j]),0.0)
             Gd[i,j] = max((G0*tau_d[i,j]*cos_zenith[i,j]),0.0)
-            Gtot[i,j] = Gb[i,j] + Gd[i,j]
-        Gav_day[i] = np.average(Gtot[i])
-        Gb_av[i] = np.average(Gb[i])
-        Gd_av[i] = np.average(Gd[i])
+            G_glob[i,j] = Gb[i,j]*cos_zenith[i,j] + Gd[i,j]
+            qd[i,j] = max((Ipart[i]*G_glob[i,j]),0.0)
+            qb[i,j] = max((G_glob[i,j] - qd[i,j]),0.0)
+            qtot[i,j] = max((qb[i,j]*cos_theta[i,j]+qd[i,j]),0.0)
+        qav_day[i] = np.average(qtot[i])
+        qb_av[i] = np.average(qb[i])
+        qd_av[i] = np.average(qd[i])
     
     for j in range(len(hours)):
-        Gav_hr[j] = np.average(Gtot[:,j])
+        qav_hr[j] = np.average(qtot[:,j])
         
-    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr,cos_theta,tau_b,tau_d,cos_zenith)
+    return (qb,qd,qtot,qav_day,qb_av,qd_av,qav_hr,cos_theta,tau_b,tau_d,cos_zenith,Ipart)
 #%%
 
-def annual_calc(empirical_path,Gtot):
+def annual_calc(empirical_path,qtot):
     ''' Importing empirical data '''
-    Gav_emp = np.loadtxt(empirical_path)
+    qav_emp = np.loadtxt(empirical_path)
     ''' Calculation of total annual solar energy (average) '''
-    E_sim = round(np.sum(Gtot,dtype=np.float)/1e6 ,4) # Here we have all the data so simply sum it all and change it to MWh/m^2.
-    E_emp = round(np.sum(Gav_emp)*24/1e6,4) # Multiply every day average by 24 hours.
-    return [Gav_emp,E_sim,E_emp]
+    E_sim = round(np.sum(qtot,dtype=np.float)/1e6 ,4) # Here we have all the data so simply sum it all and change it to MWh/m^2.
+    E_emp = round(np.sum(qav_emp)*24/1e6,4) # Multiply every day average by 24 hours.
+    return [qav_emp,E_sim,E_emp]
 
 #%%
-def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_emp,E_sim,E_emp,Gav_hr,two_axis_tracking,panel_south_angle):
+def plotter(days,hours,location_name,surf_normal,qtot,qav_day,qb_av,qd_av,qav_emp,E_sim,E_emp,qav_hr,two_axis_tracking,panel_south_angle):
     delta_t_solar=hours-12
     ''' Plotting the results '''
     #plt.close('all')
@@ -127,35 +138,35 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
              " E$_{simulation}$ =  "+str(E_sim)+"["+r'$\frac{MWh}{m^2}$'+"]"
              " , E$_{empirical}$ = "+str(E_emp)+"["+r'$\frac{MWh}{m^2}$'+"]" ,fontweight = "bold", fontsize=14)
     ax1 = fig1.add_subplot(221)
-    ax1.plot(days,Gav_day, label = "Simulation")
-    ax1.plot(days,Gav_emp, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
+    ax1.plot(days,qav_day, label = "Simulation")
+    ax1.plot(days,qav_emp, label = "Empirical") #Multiplting since the eimpirical averaging is for 24 hours
     ax1.set_xlabel("Day")
-    ax1.set_ylabel("Average global flux ["+r'$\frac{W}{m^2}$'+"]")
+    ax1.set_ylabel("Average total flux ["+r'$\frac{W}{m^2}$'+"]")
     ax1.set_title("Average daily flux (based on 24 hours)")
     ax1.legend()
     ax1.grid()
     
     ax2 = fig1.add_subplot(222)
     for i in range(int(0.5*len(delta_t_solar)-6),int(0.5*len(delta_t_solar)+6)):
-        ax2.plot(days,Gtot[:,i],label = "$\Delta$"+"$t_{solar}$ = "+str(delta_t_solar[i]))
+        ax2.plot(days,qtot[:,i],label = "$\Delta$"+"$t_{solar}$ = "+str(delta_t_solar[i]))
         ax2.set_xlabel("Day")
-        ax2.set_ylabel("Global flux ["+r'$\frac{W}{m^2}$'+"]")
+        ax2.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
         ax2.set_title("Hours through the year")
     ax2.legend(loc='right')
     ax2.grid()
     
     ax3 = fig1.add_subplot(223)
     for i in range(0,len(days),30):
-        ax3.plot(hours,Gtot[i,:], label ="Day ="+str(days[i]))
+        ax3.plot(hours,qtot[i,:], label ="Day ="+str(days[i]))
     ax3.set_xlabel("Solar Hour")
-    ax3.set_ylabel("Global flux ["+r'$\frac{W}{m^2}$'+"]")
+    ax3.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
     ax3.set_title("Hours through the day")
     ax3.legend()
     ax3.grid()
     
     ax4 = fig1.add_subplot(224)
-    ax4.plot(days,Gb_av, label = "Beam")
-    ax4.plot(days,Gd_av, label = "Diffuse")
+    ax4.plot(days,qb_av, label = "Beam")
+    ax4.plot(days,qd_av, label = "Diffuse")
     ax4.set_xlabel("Day")
     ax4.set_ylabel("Average flux components ["+r'$\frac{W}{m^2}$'+"]")
     ax4.set_title("Average beam vs. diffuse flux")
