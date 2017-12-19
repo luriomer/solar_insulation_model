@@ -48,6 +48,7 @@ Gav_hr = main_calc[6]
 cos_theta = main_calc[7]
 tau_b = main_calc[8]
 tau_d = main_calc[9]
+cos_zenith = main_calc[10]
 
 annual = annual_calc(empirical_data_path,Gtot)
 Gav_emp = annual[0]

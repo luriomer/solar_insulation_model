@@ -96,7 +96,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     for j in range(len(hours)):
         Gav_hr[j] = np.average(Gtot[:,j])
         
-    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr,cos_theta,tau_b,tau_d)
+    return (Gb,Gd,Gtot,Gav_day,Gb_av,Gd_av,Gav_hr,cos_theta,tau_b,tau_d,cos_zenith)
 #%%
 
 def annual_calc(empirical_path,Gtot):
