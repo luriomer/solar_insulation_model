@@ -116,8 +116,12 @@ def plotter(days,hours,location_name,surf_normal,Gtot,Gav_day,Gb_av,Gd_av,Gav_em
     fig1 = plt.figure()
     if two_axis_tracking:
         panel_south_angle = "Two axis tracking"
-    else:
+    elif panel_south_angle == 0:
+        panel_south_angle = "Horizontal"
+    elif panel_south_angle > 0:
         panel_south_angle = str(panel_south_angle)+"$\degree$"+" to the south"
+    elif panel_south_angle < 0:
+        panel_south_angle = str(abs(panel_south_angle))+"$\degree$"+" to the north"
     fig1.suptitle("Location: "+location_name+"\nSurface orientation: "
                   +str(panel_south_angle)+"\n"+"Total annual energy:"
              " E$_{simulation}$ =  "+str(E_sim)+"["+r'$\frac{MWh}{m^2}$'+"]"
