@@ -81,9 +81,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     k = Hottel[2]
     
     ''' Calculation of daily parameters '''
-    #delta_t_solar = hours-12 #Solar noon difference [hours]
-    delta_t_solar = solar_time_difference(days,L,Lstd)
-    
+    delta_t_solar = solar_time_difference(days,L,Lstd) #Solar noon difference [hours]
     
 
     ''' Main calculation loops '''
