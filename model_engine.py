@@ -48,12 +48,19 @@ def Klein(kT_path):
     kT = np.loadtxt(kT_path)
     return (1.390 - 4.027*kT+5.53*kT**2-3.108*kT**3)
 #%%
-def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A,two_axis_tracking,Ipart):
+def solar_time_difference(days,L,Lstd):
+    B = (days-1)*2*np.pi/365
+    E = 229.2*(0.000075+0.001868*np.cos(B)-0.03208*np.sin(B)-0.01462*np.cos(2*B)-0.04089*np.sin(2*B))
+    delta_t_solar = (4*(Lstd-L)+E)/60
+    return delta_t_solar
+#%%
+def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A,two_axis_tracking,Ipart,L,Lstd):
     ''' Calculation of flux in different times during the day using the correlations'''
 
     ''' Preperation of array variables '''
     shape = [len(days),len(hours)] # General array matrix shape [days and hours]
     sun_vec = np.zeros([3,len(days),len(hours)], dtype=float)
+    omega = np.zeros(shape, dtype=float) # Hour angle
     cos_theta = np.zeros(shape, dtype=float)
     cos_zenith = np.zeros(shape, dtype=float)
     tau_b = np.zeros(shape, dtype=float)
@@ -74,17 +81,19 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     k = Hottel[2]
     
     ''' Calculation of daily parameters '''
-    delta_t_solar = hours-12 #Solar noon difference [hours]
-    omega = (delta_t_solar*360/(24))*np.pi/180 #Hour angle [rad]
+    #delta_t_solar = hours-12 #Solar noon difference [hours]
+    delta_t_solar = solar_time_difference(days,L,Lstd)
+    
     
 
     ''' Main calculation loops '''
     for i in range(len(days)):
         for j in range(len(hours)):
-            sun_vec[0,i,j] = -np.sin(phi)*np.cos(delta[i])*np.cos(omega[j])+np.cos(phi)*np.sin(delta[i])
-            sun_vec[1,i,j] = np.cos(delta[i])*np.sin(omega[j])
-            sun_vec[2,i,j] = np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i])
-            cos_zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[j])+np.sin(phi)*np.sin(delta[i]))
+            omega[i,j] = ((hours[j]+delta_t_solar[i]-12)*360/(24))*np.pi/180 #Hour angle [rad]
+            sun_vec[0,i,j] = -np.sin(phi)*np.cos(delta[i])*np.cos(omega[i,j])+np.cos(phi)*np.sin(delta[i])
+            sun_vec[1,i,j] = np.cos(delta[i])*np.sin(omega[i,j])
+            sun_vec[2,i,j] = np.cos(phi)*np.cos(delta[i])*np.cos(omega[i,j])+np.sin(phi)*np.sin(delta[i])
+            cos_zenith[i,j] = (np.cos(phi)*np.cos(delta[i])*np.cos(omega[i,j])+np.sin(phi)*np.sin(delta[i]))
             if two_axis_tracking:
                 cos_theta[i,j] = 1.0
             else:
@@ -107,7 +116,7 @@ def main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer_start,summer_end,A
     for j in range(len(hours)):
         qav_hr[j] = np.average(qtot[:,j])
         
-    return (qb,qd,qtot,qav_day,qb_av,qd_av,qav_hr,cos_theta,tau_b,tau_d,cos_zenith,Ipart)
+    return (qb,qd,qtot,qav_day,qb_av,qd_av,qav_hr,cos_theta,tau_b,tau_d,cos_zenith,Ipart,delta_t_solar)
 #%%
 
 def annual_calc(empirical_path,qtot):
@@ -120,7 +129,7 @@ def annual_calc(empirical_path,qtot):
 
 #%%
 def plotter(days,hours,location_name,surf_normal,qtot,qav_day,qb_av,qd_av,qav_emp,E_sim,E_emp,qav_hr,two_axis_tracking,panel_south_angle):
-    delta_t_solar=hours-12
+    delta_t_noon = hours-12
     ''' Plotting the results '''
     #plt.close('all')
     
@@ -147,8 +156,8 @@ def plotter(days,hours,location_name,surf_normal,qtot,qav_day,qb_av,qd_av,qav_em
     ax1.grid()
     
     ax2 = fig1.add_subplot(222)
-    for i in range(int(0.5*len(delta_t_solar)-6),int(0.5*len(delta_t_solar)+6)):
-        ax2.plot(days,qtot[:,i],label = "$\Delta$"+"$t_{solar}$ = "+str(delta_t_solar[i]))
+    for i in range(int(0.5*len(delta_t_noon)-6),int(0.5*len(delta_t_noon)+6)):
+        ax2.plot(days,qtot[:,i],label = "$\Delta$"+"$t_{noon}$ = "+str(delta_t_noon[i]))
         ax2.set_xlabel("Day")
         ax2.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
         ax2.set_title("Hours through the year")
@@ -158,7 +167,7 @@ def plotter(days,hours,location_name,surf_normal,qtot,qav_day,qb_av,qd_av,qav_em
     ax3 = fig1.add_subplot(223)
     for i in range(0,len(days),30):
         ax3.plot(hours,qtot[i,:], label ="Day ="+str(days[i]))
-    ax3.set_xlabel("Solar Hour")
+    ax3.set_xlabel("Hour")
     ax3.set_ylabel("Total flux ["+r'$\frac{W}{m^2}$'+"]")
     ax3.set_title("Hours through the day")
     ax3.legend()

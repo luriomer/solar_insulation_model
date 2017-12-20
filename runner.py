@@ -20,8 +20,8 @@ from model_engine import surface_normal_calc,Klein,main_flux_calc,annual_calc,pl
 ''' Analysis parameters: change as neccessary'''
 location_name = "Las-Vegas, Nevada"
 axial_tilt = 23.45*(np.pi/180) # Earth axial tilt angle [rad]
-L_std = 120 # Standart longtitude line (west) [deg]
-L = 115     # Actual longtitude line (west) [deg]
+Lstd = 120 # Standart longtitude line (west) [deg]
+L = 115 # Actual longtitude line (west) [deg]
 phi = 36*(np.pi/180) #Latitude line (north) [rad]
 G0 = 1362 # Solar constant [W/m**2]
 A = 0.610 # Altitude [km]
@@ -39,7 +39,7 @@ delta = axial_tilt*np.sin(((days-81)*2*np.pi/365)) #Declination angle [rad]
 surf_normal = surface_normal_calc(-np.tan(panel_south_angle*(np.pi/180)),0,1) # To use the degree attribute, must be yL=0 and zL=0.
 
 ''' Calling the primary engine process '''
-main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer[0],summer[1],A,two_axis_tracking,Ipart)
+main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer[0],summer[1],A,two_axis_tracking,Ipart,L,Lstd)
 qb = main_calc[0]
 qd = main_calc[1]
 qtot = main_calc[2]
@@ -52,6 +52,7 @@ tau_b = main_calc[8]
 tau_d = main_calc[9]
 cos_zenith = main_calc[10]
 Ipart = main_calc[11]
+delta_t_solar = main_calc[12]
 
 annual = annual_calc(empirical_data_path,qtot)
 Gav_emp = annual[0]
