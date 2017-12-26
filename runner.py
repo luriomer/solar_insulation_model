@@ -30,7 +30,7 @@ panel_south_angle = 27 # Panel angle to the south [deg]
 empirical_data_path = 'empirical_insulation.txt'
 kT_path = 'kT.txt'
 Ipart = Klein(kT_path)
-two_axis_tracking = False # Two axis tracking configuration. Overrides the panel angle.
+two_axis_tracking = True # Two axis tracking configuration. Overrides the panel angle.
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
