@@ -3,7 +3,7 @@
 @ Omer Luria
 luriomer@gmail.com 
 Tel-Aviv University
-Version 0.05, Dec 2017
+Version 0.06, Dec 2017
 
 This simulation calculates solar insulation in desired location throughout the year, and generated
 graphic results.
@@ -30,13 +30,15 @@ panel_south_angle = 27 # Panel angle to the south [deg]
 empirical_data_path = 'empirical_insulation.txt'
 kT_path = 'kT.txt'
 Ipart = Klein(kT_path)
-two_axis_tracking = True # Two axis tracking configuration. Overrides the panel angle.
+two_axis_tracking = False # Two axis tracking configuration. Overrides the panel angle.
+
 
 ''' Independent variables '''
 days = np.arange(1,366,1) # Days throughout the year
 hours = np.arange(0,25,1) # Hours throughout the day (already in solar time!)
 delta = axial_tilt*np.sin(((days-81)*2*np.pi/365)) #Declination angle [rad]
 surf_normal = surface_normal_calc(-np.tan(panel_south_angle*(np.pi/180)),0,1) # To use the degree attribute, must be yL=0 and zL=0.
+
 
 ''' Calling the primary engine process '''
 main_calc = main_flux_calc(days,hours,phi,G0,surf_normal,delta,summer[0],summer[1],A,two_axis_tracking,Ipart,L,Lstd)
@@ -67,3 +69,7 @@ plotter(days,hours,location_name,surf_normal,qtot,qav_day,qb_av,qd_av,Gav_emp,E_
 
 ''' Save the results to tsv .txt files inside a results folder in the local directory '''
 np.savetxt("results/qtot.txt",qtot)
+np.savetxt("results/qb.txt",qb)
+np.savetxt("results/qd.txt",qd)
+np.savetxt("results/cos_zenith.txt",cos_zenith)
+np.savetxt("results/cos_theta.txt",cos_theta)

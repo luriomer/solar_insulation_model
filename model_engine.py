@@ -3,7 +3,7 @@
 @ Omer Luria
 luriomer@gmail.com 
 Tel-Aviv University
-Version 0.05, Dec 2017
+Version 0.06, Dec 2017
 
 This simulation calculates solar insulation in desired location throughout the year, and generated
 graphic results.
